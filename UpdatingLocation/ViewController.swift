@@ -7,19 +7,55 @@
 //
 
 import UIKit
+import CoreLocation
 
-class ViewController: UIViewController {
-
+class ViewController: UIViewController, CLLocationManagerDelegate {
+    
+    var locationManager: CLLocationManager!
+    var isUpdating: Bool = false
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
+        
+        locationManager = CLLocationManager()
+        locationManager.delegate = self
+        locationManager.desiredAccuracy = kCLLocationAccuracyBest
+        locationManager.distanceFilter = 5
+        
+        let status = CLLocationManager.authorizationStatus()
+        if (status != CLAuthorizationStatus.authorizedAlways) {
+            locationManager.requestAlwaysAuthorization()
+        }
     }
-
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
+    
+    func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
+        switch (status) {
+        case .authorizedAlways:
+            updatingLocation()
+            break
+        default:
+            break
+        }
     }
-
-
+    
+    public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        print("locations: \(locations.count)")
+        for location in locations {
+            print(location.description)
+        }
+    }
+    
+    func updatingLocation() {
+        guard isUpdating == false else {
+            return
+        }
+        isUpdating = true
+        
+        locationManager.startUpdatingLocation()
+    }
+    
+    public func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        print(error.localizedDescription)
+    }
+    
 }
-
